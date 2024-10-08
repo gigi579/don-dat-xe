@@ -1,1 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOÀNG ĐẸP TRAI</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #1eacc7;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: #fff;
+        }
+
+        button {
+            background-color: #1eacc7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #035d91;
+        }
+
+        #result, #confirmation {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>HOÀNG ĐẸP TRAI</h1>
+
+<label for="name">Tên:</label>
+<input type="text" id="name" placeholder="Nhập tên của bạn" required>
+
+<label for="pickup-location">Điểm đón:</label>
+<input type="text" id="pickup-location" placeholder="Nhập điểm đón" required>
+
+<label for="vehicle-type">Loại xe:</label>
+<select id="vehicle-type">
+    <option value="4-cho">Xe 4 chỗ</option>
+    <option value="7-cho">Xe 7 chỗ</option>
+    <option value="16-cho">Xe 16 chỗ</option>
+    <option value="29-cho">Xe 29 chỗ</option>
+    <option value="45-cho">Xe 45 chỗ</option>
+    <option value="limousine">Limousine</option>
+</select>
+
+<label for="destination">Tỉnh thành:</label>
+<select id="destination" onchange="loadDistricts()">
+    <option value="" disabled selected>-- Chọn tỉnh thành --</option>
+    <option value="" disabled>-- ĐÔNG NAM BỘ --</option>
+    <option value="Hồ Chí Minh">Hồ Chí Minh</option> 
+    <option value="Bình Dương">Bình Dương</option>
+    <option value="Đồng Nai">Đồng Nai</option>
+    <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+    <option value="Tây Ninh">Tây Ninh</option>
+    <option value="Bình Phước">Bình Phước</option>
+    <option value="" disabled>-- MIỀN TÂY --</option>
+    <option value="Tiền Giang">Tiền Giang</option>
+    <option value="Bến Tre">Bến Tre</option>
+    <option value="Trà Vinh">Trà Vinh</option>
+    <option value="Vĩnh Long">Vĩnh Long</option>
+    <option value="Đồng Tháp">Đồng Tháp</option>
+    <option value="An Giang">An Giang</option>
+    <option value="Hậu Giang">Hậu Giang</option>
+    <option value="Kiên Giang">Kiên Giang</option>
+    <option value="Cà Mau">Cà Mau</option>
+    <option value="Sóc Trăng">Sóc Trăng</option>
+    <option value="" disabled>-- MIỀN TRUNG --</option>
+    <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+    <option value="Đà Nẵng">Đà Nẵng</option>
+    <option value="Quảng Nam">Quảng Nam</option>
+    <option value="Quảng Ngãi">Quảng Ngãi</option>
+    <option value="Bình Định">Bình Định</option>
+    <option value="Phú Yên">Phú Yên</option>
+    <option value="Khánh Hòa">Khánh Hòa</option>
+    <option value="Ninh Thuận">Ninh Thuận</option>
+    <option value="Bình Thuận">Bình Thuận</option>
+    <option value="" disabled>-- TÂY NGUYÊN --</option>
+    <option value="Gia Lai">Gia Lai</option>
+    <option value="Kon Tum">Kon Tum</option>
+    <option value="Đắk Lắk">Đắk Lắk</option>
+    <option value="Đắk Nông">Đắk Nông</option>
+    <option value="Lâm Đồng">Lâm Đồng</option>
+</select>
+
+<label for="district">Huyện:</label>
+<select id="district">
+    <option value="">-- Chọn huyện --</option>
+</select>
+
+<label for="distance">Khoảng cách (km):</label>
+<input type="text" id="distance" placeholder="Khoảng cách từ điểm đón đến điểm đến" disabled>
+
+<button onclick="calculatePrice()">Tra cứu</button>
+<button onclick="copyToClipboard()">Sao chép xác nhận</button>
+
+<div id="result"></div>
+<div id="confirmation"></div>
+
+<script>
+    const apiKey = 'AIzaSyAL1-eS7N1phIkug7KSvE4LKZIwHftkMpU'; // API Key
+    const spreadsheetId = '1B3ga0MDSv2cNdeHVIJQ9p0XzM-9Z1PJo6KGeBfyQ-Oo';
+    const range = 'Sheet1!A1:E253'; // Cập nhật range để bao gồm khoảng cách
+    let data = [];
+
+    function loadDistricts() {
+        const destination = document.getElementById("destination").value;
+        const districtSelect = document.getElementById("district");
+        districtSelect.innerHTML = '<option value="">-- Chọn huyện --</option>';
+
+        if (destination) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`, true);
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const json = JSON.parse(xhr.responseText);
+                    data = json.values.slice(1);
+                    const districts = new Set(data.filter(row => row[0] === destination).map(row => row[1]));
+                    districts.forEach(district => {
+                        const option = document.createElement("option");
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                } else {
+                    console.error('Error fetching data:', xhr.statusText);
+                    alert("Không thể tải dữ liệu. Vui lòng thử lại.");
+                }
+            };
+            xhr.onerror = function() {
+                console.error('Request failed');
+                alert("Không thể tải dữ liệu. Vui lòng thử lại.");
+            };
+            xhr.send();
+        }
+    }
+
+    function calculatePrice() {
+        const vehicleType = document.getElementById("vehicle-type").value;
+        const destination = document.getElementById("destination").value;
+        const district = document.getElementById("district").value;
+        const pickupLocation = document.getElementById("pickup-location").value;
+        const name = document.getElementById("name").value;
+        const resultDiv = document.getElementById("result");
+        const confirmationDiv = document.getElementById("confirmation");
+        const distanceInput = document.getElementById("distance");
+
+        const priceData = data.find(row => row[0] === destination && row[1] === district && row[2] === '4-cho');
+        if (priceData) {
+            let basePrice = parseFloat(priceData[3].replace(/,/g, ''));
+            let distance = parseFloat(priceData[4].replace(/,/g, ''));
+            distanceInput.value = distance; // Hiển thị khoảng cách
+            let finalPrice;
+            switch (vehicleType) {
+                case '4-cho': finalPrice = basePrice; break;
+                case '7-cho': finalPrice = basePrice * 1.15; break;
+                case '16-cho': finalPrice = basePrice * 1.5; break;
+                case '29-cho': finalPrice = basePrice * 1.75; break;
+                case '45-cho': finalPrice = basePrice * 2; break;
+                case 'limousine': finalPrice = basePrice * 2.5; break;
+                default: finalPrice = basePrice; break;
+            }
+            resultDiv.textContent = `Giá dự kiến cho ${vehicleType} từ ${pickupLocation} đến ${district}, ${destination} là: ${finalPrice.toFixed(0)} VNĐ.`;
+            confirmationDiv.textContent = `Xác nhận: Tên: ${name}, Điểm đón: ${pickupLocation}, Loại xe: ${vehicleType}, Huyện: ${district}, Tỉnh: ${destination}, Giá: ${finalPrice.toFixed(0)} VNĐ`;
+        } else {
+            alert("Không tìm thấy thông tin giá cho địa điểm này.");
+        }
+    }
+
+    function copyToClipboard() {
+        const confirmationText = document.getElementById("confirmation").textContent;
+        navigator.clipboard.writeText(confirmationText).then(() => {
+            alert('Đã sao chép xác nhận vào clipboard!');
+        }).catch(err => {
+            console.error('Error copying text: ', err);
+        });
+    }
+</script>
+
+</body>
+</html>
 
